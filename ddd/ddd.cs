@@ -3,6 +3,8 @@
 // ======================================================
 // This page contains C# code snippets adapted from the talk
 // "Domain-driven design with the F# type system"
+// A helper set of classes are contained in the accompanying Choice.cs to enable "Choice" types
+// (also known as discriminated unions)
 // ======================================================
 
 // To execute code in Visual Studio Code Insiders Preview, 
@@ -13,6 +15,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices.ComTypes;
 using DiscriminatedUnions;
 
 var three = 1 + 2;
@@ -222,8 +225,8 @@ namespace ValueAndEntityReview {
 namespace CardGameBoundedContext {
 
     // | means a choice -- pick one from the list
-    using Suit = Union<Club, Diamond, Spade, Heart>;
-    using Rank = Union<Two, Three, Four, Five, Six, Seven, Eight, Nine, Ten, Jack, Queen, King, Ace>;
+    using Suit = Choice<Club, Diamond, Spade, Heart>;
+    using Rank = Choice<Two, Three, Four, Five, Six, Seven, Eight, Nine, Ten, Jack, Queen, King, Ace>;
     using Hand = List<Card>;
     using Deck = List<Card>;
 
@@ -267,82 +270,88 @@ namespace CardGameBoundedContext {
 
 
 // ======================================================
-// Understanding the F# type system
+// Understanding the C# type system and use of custom Choice<T1, T2, ...> union type
 // ======================================================
 
 // highlight from here ===>
-namespace ProductTypeExamples = 
+namespace ProductTypeExamples {
+    using Person = String; // dummy type 
+    using Date = String; // dummy type    
+    record Birthday(Person Person, Date Date);
 
-    let x = (1,2)    //  int * int
-    let y = (true,false)    //  bool * bool 
+    class Example
+    {
+        void Test()
+        {
+            var x = (1,2);    //  ValueTuple<int, int>
+            var y = (true,false);    //  ValueTuple<bool, bool>
 
-    type Person = Person of string // dummy type    
-    type Date = Date of string // dummy type    
-
-    type Birthday = Person * Date
+            var alice = new Person("Alice");
+            var date1 = new Date("Jan 12th");
+            var aliceBDay = new Birthday(alice,date1);
+            Birthday aliceBDay2 = new (alice,date1);  // with target typing
+            Birthday aliceBDay3 = new Birthday(alice, date1);  // with fully explicit typing
+        }
+    }
+}
 // <==== highlight to here and Run
 
 
 // highlight from here ===>
-namespace TestProductTypeExamples = 
-    using ProductTypeExamples
+namespace ChoiceTypeExamples{
 
-    let alice = Person "Alice"
-    let date1 = Date "Jan 12th"
-    let aliceBDay = (alice,date1)
-    let aliceBDay2 : Birthday = (alice,date1)  // with explicit typing
-// <==== highlight to here and Run
+    using Temp = Choice<F, C>;
 
+    using CardType = Choice<Visa, MasterCard>;
+    using CardNumber = Int32;
+    using ChequeNumber = Int32;
 
-// highlight from here ===>
-namespace ChoiceTypeExamples = 
+    using PaymentMethod = Choice<Cash, Cheque, Card>;
+
+    record F(int Value);
+    record C(double Value);
+    record Cash;
+    record Cheque(ChequeNumber ChequeNumber);
+    record Card(CardType CardType, CardNumber CardNumber);
+    record Visa;
+    record MasterCard;
+
+    class Example
+    {
+        void Test()
+        {
+            Func<Temp, bool> isFever = temp => temp.Item switch // dynamically-typed in C# impl
+                {
+                    F tempInF => tempInF.Value > 101,
+                    C tempInC => tempInC.Value > 38.0,
+                    _ => throw new ArgumentException()
+                };
+
+            var temp1 = new F(103);
+            Console.WriteLine($"temp {temp1} is fever? {isFever(temp1)}");
+
+            var temp2 = new C(37.0);
+            Console.WriteLine($"temp {temp2} is fever? {isFever(temp2)}");
+
+            Action<PaymentMethod> printPayment = paymentMethod => 
+                Console.WriteLine(paymentMethod.Item switch
+                {
+                    Cash          => $"Paid in cash",
+                    Cheque cheque => $"Paid by cheque: {cheque.ChequeNumber}",
+                    Card card     => $"Paid with {card.CardType} {card.CardNumber}",
+                    _             => throw new ArgumentException()
+                });
+
+            var cashPayment = new Cash();
+            var chequePayment = new Cheque(123);
+            var cardPayment = new Card (new Visa(), 123);
     
-    type Temp = 
-      | F of int
-      | C of float
-
-
-    type CardType = CardType of string
-    type CardNumber = CardNumber of string
-
-    type PaymentMethod = 
-      | Cash
-      | Cheque of int
-      | Card of CardType * CardNumber
-
-// <==== highlight to here and Run
-
-// highlight from here ===>
-namespace TestChoiceTypeExamples = 
-    using ChoiceTypeExamples
-
-    let isFever temp = 
-        match temp with
-        | F tempInF -> tempInF > 101
-        | C tempInC -> tempInC > 38.0
-
-    let temp1 = F 103 
-    Console.WriteLine($"temp %A is fever? %b" temp1 (isFever temp1)
-
-    let temp2 = C 37.0
-    Console.WriteLine($"temp %A is fever? %b" temp2 (isFever temp2)
-
-    let printPayment paymentMethod = 
-        match paymentMethod with
-        | Cash -> 
-            Console.WriteLine($"Paid in cash"
-        | Cheque checkNo ->
-            Console.WriteLine($"Paid by cheque: %i" checkNo
-        | Card (cardType,cardNo) ->
-            Console.WriteLine($"Paid with %A %A" cardType cardNo
-
-    let cashPayment = Cash
-    let chequePayment  = Cheque 123
-    let cardPayment  = Card (CardType "Visa",CardNumber "123")
-    
-    printPayment cashPayment
-    printPayment chequePayment
-    printPayment cardPayment
+            printPayment(cashPayment);
+            printPayment(chequePayment);
+            printPayment(cardPayment);
+        }
+    }
+}
 // <==== highlight to here and Run
 
 
