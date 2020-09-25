@@ -1,3 +1,5 @@
+
+
 // ======================================================
 // This page contains C# code snippets adapted from the talk
 // "Domain-driven design with the F# type system"
@@ -9,11 +11,14 @@
 
 // Try it! highlight from here ===>
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using DiscriminatedUnions;
 
 var three = 1 + 2;
 Func<double, double> square = x => x * x;
 Console.WriteLine($"Three is {three}");
-Console.WriteLine($"Three is {sqaure(three)}");
+Console.WriteLine($"Three is {square(three)}");
 // <==== highlight to here and Run
 
 // ======================================================
@@ -59,12 +64,17 @@ namespace RecordTypeExample
 namespace TestRecordTypeExample
 {
     using RecordTypeExample;
-        
-    var alice = new Person(FirstName: "Alice", LastName: "Adams");
-    var aliceClone = new Person(FirstName: "Alice", LastName: "Adams");
-    Console.WriteLine($"Alice's name is {alice}");
-    Console.WriteLine($"AliceClone's name is {aliceClone}");
-    Console.WriteLine($"Are Alice and clone equal? {alice == aliceClone}");
+    class Example
+    {
+        void Test()
+        {
+            var alice = new PersonalName(FirstName: "Alice", LastName: "Adams");
+            var aliceClone = new PersonalName(FirstName: "Alice", LastName: "Adams");
+            Console.WriteLine($"Alice's name is {alice}");
+            Console.WriteLine($"AliceClone's name is {aliceClone}");
+            Console.WriteLine($"Are Alice and clone equal? {alice == aliceClone}");
+        }
+    }
 }
 // <==== highlight to here and Run 
 
@@ -80,26 +90,21 @@ namespace TestRecordTypeExample
 // define the type
 namespace EntityTypeExample {
 
-    // immutable object type compared by value
+    // class with immutable members, compared by member value
     record PersonalName(string FirstName, string LastName);
 
-    // immutable object type compared by custom member logic
-    record Person(int Id, PersonalName Name)
+    // class with immutable members, compared by custom member logic (lack of parity between conciseness of entities and records)
+    class Person
     {
-        public override bool Equals(object other) => other switch
-            { 
-                Person p => Id == p.Id,
-                _        => false
-            };
-        
-        public override int this.GetHashCode() => this.Id.GetHashCode();
-    }
-
-    // similar to Person class above except without "superset" features of record types ("with" expression, etc)
-    class Person2
-    {
-        public int Id { get; init; }
+        public int Id { get; init; } 
         public PersonalName Name { get; init; }
+
+        // required properties coming in C# 10 (for now, constrain inputs with parameterized constructor)
+        public Person(int Id, PersonalName Name) // using upper-case to match record constructor
+        {
+            this.Id = Id;
+            this.Name = Name;
+        }
 
         public override bool Equals(object other) => other switch
         {
@@ -107,24 +112,21 @@ namespace EntityTypeExample {
             _ => false
         };
 
-        public override int this.GetHashCode() => this.Id.GetHashCode();
+        public override int GetHashCode() => this.Id.GetHashCode();
     }
-}
-// <==== highlight to here and Run
-
-
-// highlight from here ===>
-// test the code 
-namespace TestEntityTypeExample {
-
-    using EntityTypeExample;
     
-    var alice = new Person(Id: 1, Name: new PersonalName(FirstName: "Alice", LastName="Adams"));
-    var bilbo = new Person(Id: 1, Name: new PersonalName(FirstName: "Bilbo", LastName = "Baggins"));
-    Console.WriteLine($"Alice is {alice}");
-    Console.WriteLine($"Bilbo is {bilbo}");
-    Console.WriteLine($"Are Alice and Bilbo equal? {alice == bilbo}");
-    Console.WriteLine($"Are Alice.Name and Bilbo.Name equal? {alice.Name == bilbo.Name}");
+    class Example
+    {
+        void Test()
+        { 
+            var alice = new Person( 1, new PersonalName(FirstName: "Alice", LastName: "Adams") );
+            var bilbo = new Person( 1, new PersonalName(FirstName: "Bilbo", LastName: "Baggins") );
+            Console.WriteLine($"Alice is {alice}");
+            Console.WriteLine($"Bilbo is {bilbo}");
+            Console.WriteLine($"Are Alice and Bilbo equal? {alice == bilbo}");
+            Console.WriteLine($"Are Alice.Name and Bilbo.Name equal? {alice.Name == bilbo.Name}");
+        }
+    }
 }
 // <==== highlight to here and Run
 
@@ -135,65 +137,34 @@ namespace TestEntityTypeExample {
 
 // highlight from here ===>
 // define the type
-namespace RecordVersioningExample { 
+namespace RecordVersioningExample {
 
-    using System;
-    
-    // immutable object type compared by value
+    // class with immutable members, compared by member value
     record PersonalName(string FirstName, string LastName);
 
-    // immutable object type compared by custom member logic
-    record Person(int Id, Guid Version, PersonalName Name)
+    // class with immutable members, compared by member value
+    record Person(int Id, Guid Version, PersonalName Name);
+
+    class Example
     {
-        public override bool Equals(object other) => other switch
+        void Test()
+        {
+            var alice = new Person(Id: 1, Version: Guid.NewGuid(), 
+                Name: new(FirstName: "Alice", LastName: "Adams"));
+
+            var aliceV2 = alice with
             { 
-                Person p => Id == p.Id && Version == p.Version,
-                _        => false
+                Version = Guid.NewGuid(),
+                Name = new PersonalName(FirstName: "Al", LastName:"Adamson")
             };
-
-        public override int GetHashCode() => this.Id.GetHashCode();
-    }
-
-    // same as Person class above except without "superset" features of record types ("with" expression, etc)
-    class Person2
-    {
-        public int Id { get; init; }
-        public Guid Version { get; init; }
-        public PersonalName Name { get; init; }
-
-        public override bool Equals(object other) => other switch
-            {
-                Person p => Id == p.Id && Version == p.Version,
-                _ => false
-            };
-
-        public override int this.GetHashCode() => this.Id.GetHashCode();
-    }
-}
-// <==== highlight to here and Run
-
-
-// highlight from here ===>
-// test the code 
-namespace TestRecordVersioningExample { 
-
-    using RecordVersioningExample;
-    using System;
-
-    var alice = new Person(Id: 1, Version: Guid.NewGuid(), 
-        Name: new(FirstName: "Alice", LastName: "Adams"));
-
-    var aliceV2 = alice with
-        { 
-            Version: Guid.NewGuid(),
-            Name: new PersonalName(FirstName: "Al", LastName:"Adamson")
-        };
     
-    Console.WriteLine($"Alice is {alice}");
-    Console.WriteLine($"AliceV2 is {aliceV2}");
-    Console.WriteLine($"Are Alice and AliceV2 equal? {alice == aliceV2}"); // no compiler error in C#
-    Console.WriteLine($"Are Alice and AliceV2 same id? {alice.Id == aliceV2.Id}");
-    Console.WriteLine($"Are Alice and AliceV2 same version? {alice.Version == aliceV2.Version}");
+            Console.WriteLine($"Alice is {alice}");
+            Console.WriteLine($"AliceV2 is {aliceV2}");
+            Console.WriteLine($"Are Alice and AliceV2 equal? {alice == aliceV2}"); // no compiler error in C#, unlike F#
+            Console.WriteLine($"Are Alice and AliceV2 same id? {alice.Id == aliceV2.Id}");
+            Console.WriteLine($"Are Alice and AliceV2 same version? {alice.Version == aliceV2.Version}");
+        }
+    }
 }
 // <==== highlight to here and Run
 
@@ -209,23 +180,19 @@ namespace RecordMutabilityExample {
     record PersonalName(string FirstName, string LastName);
 
     // object type compared by value with one mutable property
-    record Person(int Id){ public PersonalName Name { get; set; } } 
-}
-// <==== highlight to here and Run
+    record Person(int Id){ public PersonalName? Name { get; set; } } 
 
-
-
-// highlight from here ===>
-// test the code 
-namespace TestEntityMutabilityExample {
-
-    using EntityMutabilityExample;
-    
-    var alice = new Person(Id: 1){ Name = new PersonalName(FirstName: "Alice", LastName: "Adams") }
-    Console.WriteLine($"Alice before change is {alice}");
+    class Example
+    {
+        void Test()
+        {
+            var alice = new Person(Id: 1){ Name = new PersonalName(FirstName: "Alice", LastName: "Adams") };
+            Console.WriteLine($"Alice before change is {alice}");
                 
-    alice.Name = new PersonalName(FirstName: "Al", LastName: "Adamson");
-    Console.WriteLine($"Alice after change is {alice}");
+            alice.Name = new PersonalName(FirstName: "Al", LastName: "Adamson");
+            Console.WriteLine($"Alice after change is {alice}");
+        }
+    }
 }
 // <==== highlight to here and Run
 
@@ -236,10 +203,8 @@ namespace TestEntityMutabilityExample {
 // highlight from here ===>
 namespace ValueAndEntityReview { 
 
-    record PersonalName(         // an immuntable object compared by value
-        FirstName string,
-        LastName string);
-         
+    record PersonalName(string FirstName, string LastName); // an immuntable object compared by value
+
     class Person {                // an object with immutable properties compared by reference
         public int Id { get; init; }
         public PersonalName Name { get; init; }
@@ -254,45 +219,48 @@ namespace ValueAndEntityReview {
 // ======================================================
 
 // highlight from here ===>
-namespace CardGameBoundedContext = 
+namespace CardGameBoundedContext {
 
-    type Suit = Club | Diamond | Spade | Heart
-                // | means a choice -- pick one from the list
-                
-    type Rank = Two | Three | Four | Five | Six | Seven | Eight 
-                | Nine | Ten | Jack | Queen | King | Ace
+    // | means a choice -- pick one from the list
+    using Suit = Union<Club, Diamond, Spade, Heart>;
+    using Rank = Union<Two, Three, Four, Five, Six, Seven, Eight, Nine, Ten, Jack, Queen, King, Ace>;
+    using Hand = List<Card>;
+    using Deck = List<Card>;
 
-    type Card = Suit * Rank   // * means a pair -- one from each type
-    
-    type Hand = Card list
-    type Deck = Card list
-    
-    type Player = {Name:string; Hand:Hand}
-    type Game = {Deck:Deck; Players: Player list}
-    
-    type Deal = Deck -> (Deck * Card) // X -> Y means a function
-                                      // input of type X
-                                      // output of type Y
+    record Card(Suit Suit, Rank Rank);   // * means a pair -- one from each type
+    record Club; record Diamond; record Spade; record Heart;
+    record Two; record Three; record Four; record Five; record Six; record Seven; record Eight; 
+        record Nine; record Ten; record Jack; record Queen; record King; record Ace;
 
-    type PickupCard = (Hand * Card)-> Hand
-// <==== highlight to here and Run
+    record Player(string Name, Hand Hand);
+    record Game(Deck Deck, Player[] Players);
+    delegate (Deck, Card) Deal(Deck d);
+    delegate Hand PickupCard((Hand, Card) handCardTuple);
+    // Func<Deck, (Deck, Card)> Deal; // works only in class or interface scope
+    // Func<(Hand, Card), Hand> PickupCard; // works only in class or interface scope
 
+    class Example
+    {
+        void Test()
+        {
+            var aceHearts  = new Card(new Heart(), new Ace());
+            var aceSpades = new Card(new Spade(), new Ace());
+            var twoClubs = new Card(new Club(), new Two());
 
-// highlight from here ===>
-namespace TestCardGameBoundedContext = 
-    using CardGameBoundedContext
+            var myHand = new Hand { aceHearts, aceSpades, twoClubs };
 
-    let aceHearts  = (Heart, Ace)
-    let aceSpades = (Spade, Ace)
-    let twoClubs = (Club, Two)
+            var deck = new Deck { aceHearts, aceSpades, twoClubs };
 
-    let myHand = [aceHearts; aceSpades; twoClubs]
+            Func<Deck, (Deck?, Card)> deal = deck => deck switch
+            {
+                Deck d when d.Count() > 1   => (d.Take(d.Count() - 1).ToList(), d.Last()),
+                Deck d when d.Count() == 1  => (null, d[0]),
+                _                           => throw new ArgumentException("incorrect input")
+            };
 
-    let deck = [aceHearts; aceSpades; twoClubs]
-
-    let deal cards = 
-        let head::tail = cards   // compiler has found a potential bug here!
-        (tail, head)
+            (var deck2, var card) = deal(deck);
+    }
+}
 
 // <==== highlight to here and Run
 
