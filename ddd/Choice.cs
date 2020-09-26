@@ -1,5 +1,10 @@
 ﻿namespace DiscriminatedUnions
 {
+    public record Choice<A>(A Item) // equality delegated to member (Item) equality
+    {
+        public static implicit operator Choice<A>(A value) => new Choice<A>(value);
+    }
+
     public class Choice<A, B>
     {
         public static implicit operator Choice<A, B>(A value) => new Choice<A, B>(value);
@@ -9,6 +14,8 @@
         public Choice(B item) { Item = item; }
 
         public dynamic Item { get; }
+
+        public override bool Equals(object obj) => Item.Equals(obj);
     }
 
     public class Choice<A, B, C>
@@ -22,6 +29,8 @@
         public Choice(C item) { Item = item; }
 
         public dynamic Item { get; }
+
+        public override bool Equals(object obj) => Item.Equals(obj);
     }
 
     public class Choice<A, B, C, D>
@@ -37,6 +46,8 @@
         public Choice(D item) { Item = item; }
 
         public dynamic Item { get; }
+
+        public override bool Equals(object obj) => Item.Equals(obj);
     }
 
     public class Choice<A, B, C, D, E>
@@ -54,6 +65,8 @@
         public Choice(E item) { Item = item; }
 
         public dynamic Item { get; }
+
+        public override bool Equals(object obj) => Item.Equals(obj);
     }
 
     public class Choice<A, B, C, D, E, F>
@@ -73,6 +86,8 @@
         public Choice(F item) { Item = item; }
 
         public dynamic Item { get; }
+
+        public override bool Equals(object obj) => Item.Equals(obj);
     }
 
     public class Choice<A, B, C, D, E, F, G>
@@ -94,6 +109,8 @@
         public Choice(G item) { Item = item; }
 
         public dynamic Item { get; }
+
+        public override bool Equals(object obj) => Item.Equals(obj);
     }
 
     public class Choice<A, B, C, D, E, F, G, H>
@@ -117,6 +134,8 @@
         public Choice(H item) { Item = item; }
 
         public dynamic Item { get; }
+
+        public override bool Equals(object obj) => Item.Equals(obj);
     }
 
     public class Choice<A, B, C, D, E, F, G, H, I>
@@ -142,6 +161,8 @@
         public Choice(I item) { Item = item; }
 
         public dynamic Item { get; }
+
+        public override bool Equals(object obj) => Item.Equals(obj);
     }
 
     public class Choice<A, B, C, D, E, F, G, H, I, J>
@@ -169,6 +190,8 @@
         public Choice(J item) { Item = item; }
 
         public dynamic Item { get; }
+
+        public override bool Equals(object obj) => Item.Equals(obj);
     }
 
     public class Choice<A, B, C, D, E, F, G, H, I, J, K>
@@ -198,6 +221,8 @@
         public Choice(K item) { Item = item; }
 
         public dynamic Item { get; }
+
+        public override bool Equals(object obj) => Item.Equals(obj);
     }
 
     public class Choice<A, B, C, D, E, F, G, H, I, J, K, L>
@@ -229,6 +254,8 @@
         public Choice(L item) { Item = item; }
 
         public dynamic Item { get; }
+
+        public override bool Equals(object obj) => Item.Equals(obj);
     }
 
     public class Choice<A, B, C, D, E, F, G, H, I, J, K, L, M>
@@ -262,5 +289,7 @@
         public Choice(M item) { Item = item; }
 
         public dynamic Item { get; }
+
+        public override bool Equals(object obj) => Item.Equals(obj);
     }
 }

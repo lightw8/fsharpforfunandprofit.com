@@ -361,146 +361,147 @@ namespace ChoiceTypeExamples{
 // ======================================================
 
 // highlight from here ===>
-namespace OptionalType = 
+namespace OptionalType {
 
-    type OptionalString = 
-        | SomeString of string
-        | Nothing
+    class Example
+    {
+        Nullable<int> optionalInt1;
+        Nullable<bool> optionalBool1;
+        int? optionalInt2; // built-in syntax
+        bool? optionalBool2; // built-in syntax
 
-    type OptionalInt = 
-        | SomeInt of string
-        | Nothing
+        string? optionalString; // only useful with C#8 nullable reference type annotations (compiler warning, not error)
+    }
+    // <==== highlight to here and Run
 
-    type OptionalBool = 
-        | SomeBool of string
-        | Nothing
-
-    // built in!
-//    type Option<'T> = 
-//        | Some of 'T
-//        | None
-
+    // only useful with C#8 nullable reference type annotations (compiler warning, not error)
+    record PersonalName1(string FirstName, string? MiddleInitial, string LastName);
+    // alternative, but no construction constraints. C# 10 promises required properties
+    record PersonalName2
+    {
+        string FirstName { get; init; }
+        string MiddleInitial { get; init; }
+        string LastName { get; init; }
+    }
+}
 // <==== highlight to here and Run
 
 
-// highlight from here ===>
-namespace TestOptionalType = 
 
-    type PersonalName1 = 
+// highlight from here ===>
+namespace SingleChoiceType {
+    using EmailAddress = Choice<string>;
+    using PhoneNumber = Choice<string>;
+    //using EmailAddress = String; // alternative using string alias
+    //using PhoneNumber = String; // alternative using string alias
+
+    using CustomerId = Choice<int>;
+    using OrderId = Choice<int>;
+    //using CustomerId = Int32; // alternative using int alias
+    //using OrderId = Int32;// alternative using int alias
+
+    class Example
+    {
+        void Test()
         {
-        FirstName: string
-        MiddleInitial: Option<string>
-        LastName: string
-        }
+            var email1 = new EmailAddress("abc");
+            var email2 = new EmailAddress("def");
+            var phone1 = new PhoneNumber("abc");
 
-    type PersonalName2 = 
+            Console.WriteLine($"{email1} == {email2}? {email1 == email2}");
+            Console.WriteLine($"{email1} == {phone1}? {email1 == phone1}"); // no compiler error for C# (unlike F#)
+        }
+    }
+}
+// <==== highlight to here and Run
+
+
+
+// highlight from here ===>
+namespace EmailAddressType {
+    using System.Text.RegularExpressions;
+    using EmailAddress = String;
+
+    class Example
+    {
+        void Test()
+        { 
+            // function createEmailAddress : string => EmailAddress?
+            Func<string, EmailAddress?> createEmailAddress = s => s switch
+            {
+                string maybeEmail when Regex.IsMatch(maybeEmail, @"^\S+@\S+\.\S+$") => maybeEmail,
+                _                                                                   => null
+            };
+
+            // method with same signature (harder to pass it around)
+            EmailAddress CreateEmailAddress(string s) => s switch
+            {
+                string maybeEmail when Regex.IsMatch(maybeEmail, @"^\S+@\S+\.\S+$") => maybeEmail,
+                _                                                                   => null
+            };
+
+            var email1 = createEmailAddress("a@example.com");
+            var email2 = createEmailAddress("example.com");
+            var email3 = CreateEmailAddress("a@example.com");
+            var email4 = CreateEmailAddress("example.com");
+        }
+    }
+}
+// <==== highlight to here and Run
+
+
+// highlight from here ===>
+namespace ConstrainedString {
+    using String50 = String;
+
+    class Example
+    {
+        void Test()
         {
-        FirstName: string
-        MiddleInitial: string option
-        LastName: string
+            // function createEmailAddress : string => EmailAddress option
+            Func<string, String50?> createString50 = s => s switch
+            {
+                string maybeString50 when maybeString50.Length <= 50 => maybeString50,
+                _                                                    => null
+            };
+
+            var s1 = createString50("12345");
+            var s2 = createString50(new string(Enumerable.Range(0,100).Select(_ => 'a').ToArray()));
         }
-// <==== highlight to here and Run
-
-
-
-// highlight from here ===>
-namespace SingleChoiceType =
-
-    type EmailAddress = EmailAddress of string
-    type PhoneNumber = PhoneNumber of string
-
-    type CustomerId = CustomerId of int
-    type OrderId = OrderId of int
-// <==== highlight to here and Run
-
-
-
-// highlight from here ===>
-namespace TestSingleChoiceType = 
-    using SingleChoiceType       
-
-    let email1 = EmailAddress "abc"
-    let email2 = EmailAddress "def"
-    let phone1 = PhoneNumber "abc"
-
-    Console.WriteLine($"%A = %A? %b" email1 email2 (email1=email2)
-    //Console.WriteLine($"%A = %A? %b" email1 phone1 (email1=phone1)   // uncommento get compiler error
-// <==== highlight to here and Run
-
-
-
-// highlight from here ===>
-namespace EmailAddressType =
-    using System.Text.RegularExpressions 
-
-    type EmailAddress = EmailAddress of string
-
-    // createEmailAddress : string -> EmailAddress option
-    let createEmailAddress (s:string) = 
-        if Regex.IsMatch(s,@"^\S+@\S+\.\S+$") 
-            then Some (EmailAddress s)
-            else None
-// <==== highlight to here and Run
-
-// highlight from here ===>
-namespace TestEmailAddressType =
-    using EmailAddressType
-
-    let email1 = createEmailAddress "a@example.com"
-    let email2 = createEmailAddress "example.com"
+    }
+}
 // <==== highlight to here and Run
 
 
 // highlight from here ===>
-namespace ConstrainedString =
+namespace ConstrainedInteger {
+    using OrderLineQty = Int32;
+    
+    class Example
+    {
+        void Test()
+        { 
+            // function createEmailAddress : string => EmailAddress option
+            Func<int, OrderLineQty?> createOrderLineQty = qty => qty switch
+            {
+                int maybeOrderQty when maybeOrderQty > 0 && maybeOrderQty <= 99 => maybeOrderQty,
+                _                                                               => null
+            };
 
-    type String50 = String50 of string
+            // function createEmailAddress : string => EmailAddress option
+            Func<OrderLineQty, OrderLineQty?> increment = qty => createOrderLineQty(qty++);
+            Func<OrderLineQty, OrderLineQty?> decrement = qty => createOrderLineQty(qty--);
 
-    let createString50 (s:string) = 
-        if s = null
-            then None
-        else if s.Length <= 50
-            then Some (String50 s)
-            else None    
-// <==== highlight to here and Run
-
-// highlight from here ===>
-namespace TestConstrainedString =
-    using ConstrainedString
-
-    let s1 = createString50 "12345"
-    let s2 = createString50 (String.replicate 100 "a")
-// <==== highlight to here and Run
-
-
-// highlight from here ===>
-namespace ConstrainedInteger =
-
-    type OrderLineQty = OrderLineQty of int
-
-    let createOrderLineQty qty = 
-        if qty >0 && qty <= 99
-            then Some (OrderLineQty qty)
-            else None
-
-    let increment (OrderLineQty i) =
-        createOrderLineQty (i + 1)
-
-    let decrement (OrderLineQty i) =
-        createOrderLineQty (i - 1)
-// <==== highlight to here and Run
-
-// highlight from here ===>
-namespace TestConstrainedInteger =
-    using ConstrainedInteger
-
-    let qty1 = createOrderLineQty 1
-    let qty2 = createOrderLineQty 0
-
-    let qty3 = 
-        match qty1 with
-        | Some i -> decrement i
-        | None -> None
+            var qty1 = createOrderLineQty(1);
+            var qty2 = createOrderLineQty(0);
+            var qty3 = qty1 switch
+            {
+                OrderLineQty i => decrement(i),
+                _              => null
+            };
+        }
+    }
+}
 // <==== highlight to here and Run
 
 // ======================================================
