@@ -406,7 +406,6 @@ namespace SingleChoiceType {
     using OrderId2 = Choice<int>; // reference type with integer member "Item"
 
     // distinct classes that can't be confused at compile-time (have to use subclassing in C# to get this type checking)
-    // C# 10 promises primary constructors for classes (as with the new record types)
     class EmailAddress3 : Choice<string> { public EmailAddress3(string emailAddress) : base(emailAddress) { } }
     class PhoneNumber3 : Choice<string> { public PhoneNumber3(string phoneNumber) : base(phoneNumber) { } }
 
