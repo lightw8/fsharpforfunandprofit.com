@@ -1,56 +1,57 @@
-﻿namespace DiscriminatedUnions
+﻿using System;
+
+namespace DiscriminatedUnions
 {
-    public record Choice<A>(A Item) // equality delegated to member (Item) equality
+    public abstract class ChoiceBase // equality delegated to member (Item) equality
     {
-        public static implicit operator Choice<A>(A value) => new Choice<A>(value);
+        public ChoiceBase(dynamic item) { Item = item; }
+        public dynamic Item { get; }
+        public override bool Equals(object? obj) => Item.Equals(obj);
+        public override int GetHashCode() => Item.GetHashCode();
+        public override string ToString() => Item.ToString();
     }
 
-    public class Choice<A, B>
+    public class Choice<A> : ChoiceBase 
+    {
+        public static implicit operator Choice<A>(A value) => new Choice<A>(value);
+        public Choice(A item) : base(item) { }
+        public new A Item { get; init; }
+    }
+
+    public class Choice<A, B> : ChoiceBase
     {
         public static implicit operator Choice<A, B>(A value) => new Choice<A, B>(value);
         public static implicit operator Choice<A, B>(B value) => new Choice<A, B>(value);
 
-        public Choice(A item) { Item = item; }
-        public Choice(B item) { Item = item; }
-
-        public dynamic Item { get; }
-
-        public override bool Equals(object obj) => Item.Equals(obj);
+        public Choice(A item) : base(item) { }
+        public Choice(B item) : base(item) { }
     }
 
-    public class Choice<A, B, C>
+    public class Choice<A, B, C> : ChoiceBase
     {
         public static implicit operator Choice<A, B, C>(A value) => new Choice<A, B, C>(value);
         public static implicit operator Choice<A, B, C>(B value) => new Choice<A, B, C>(value);
         public static implicit operator Choice<A, B, C>(C value) => new Choice<A, B, C>(value);
 
-        public Choice(A item) { Item = item; }
-        public Choice(B item) { Item = item; }
-        public Choice(C item) { Item = item; }
-
-        public dynamic Item { get; }
-
-        public override bool Equals(object obj) => Item.Equals(obj);
+        public Choice(A item) : base(item) { }
+        public Choice(B item) : base(item) { }
+        public Choice(C item) : base(item) { }
     }
 
-    public class Choice<A, B, C, D>
+    public class Choice<A, B, C, D> : ChoiceBase
     {
         public static implicit operator Choice<A, B, C, D>(A value) => new Choice<A, B, C, D>(value);
         public static implicit operator Choice<A, B, C, D>(B value) => new Choice<A, B, C, D>(value);
         public static implicit operator Choice<A, B, C, D>(C value) => new Choice<A, B, C, D>(value);
         public static implicit operator Choice<A, B, C, D>(D value) => new Choice<A, B, C, D>(value);
 
-        public Choice(A item) { Item = item; }
-        public Choice(B item) { Item = item; }
-        public Choice(C item) { Item = item; }
-        public Choice(D item) { Item = item; }
-
-        public dynamic Item { get; }
-
-        public override bool Equals(object obj) => Item.Equals(obj);
+        public Choice(A item) : base(item) { }
+        public Choice(B item) : base(item) { }
+        public Choice(C item) : base(item) { }
+        public Choice(D item) : base(item) { }
     }
 
-    public class Choice<A, B, C, D, E>
+    public class Choice<A, B, C, D, E> : ChoiceBase
     {
         public static implicit operator Choice<A, B, C, D, E>(A value) => new Choice<A, B, C, D, E>(value);
         public static implicit operator Choice<A, B, C, D, E>(B value) => new Choice<A, B, C, D, E>(value);
@@ -58,18 +59,14 @@
         public static implicit operator Choice<A, B, C, D, E>(D value) => new Choice<A, B, C, D, E>(value);
         public static implicit operator Choice<A, B, C, D, E>(E value) => new Choice<A, B, C, D, E>(value);
 
-        public Choice(A item) { Item = item; }
-        public Choice(B item) { Item = item; }
-        public Choice(C item) { Item = item; }
-        public Choice(D item) { Item = item; }
-        public Choice(E item) { Item = item; }
-
-        public dynamic Item { get; }
-
-        public override bool Equals(object obj) => Item.Equals(obj);
+        public Choice(A item) : base(item) { }
+        public Choice(B item) : base(item) { }
+        public Choice(C item) : base(item) { }
+        public Choice(D item) : base(item) { }
+        public Choice(E item) : base(item) { }
     }
 
-    public class Choice<A, B, C, D, E, F>
+    public class Choice<A, B, C, D, E, F> : ChoiceBase
     {
         public static implicit operator Choice<A, B, C, D, E, F>(A value) => new Choice<A, B, C, D, E, F>(value);
         public static implicit operator Choice<A, B, C, D, E, F>(B value) => new Choice<A, B, C, D, E, F>(value);
@@ -78,19 +75,15 @@
         public static implicit operator Choice<A, B, C, D, E, F>(E value) => new Choice<A, B, C, D, E, F>(value);
         public static implicit operator Choice<A, B, C, D, E, F>(F value) => new Choice<A, B, C, D, E, F>(value);
 
-        public Choice(A item) { Item = item; }
-        public Choice(B item) { Item = item; }
-        public Choice(C item) { Item = item; }
-        public Choice(D item) { Item = item; }
-        public Choice(E item) { Item = item; }
-        public Choice(F item) { Item = item; }
-
-        public dynamic Item { get; }
-
-        public override bool Equals(object obj) => Item.Equals(obj);
+        public Choice(A item) : base(item) { }
+        public Choice(B item) : base(item) { }
+        public Choice(C item) : base(item) { }
+        public Choice(D item) : base(item) { }
+        public Choice(E item) : base(item) { }
+        public Choice(F item) : base(item) { }
     }
 
-    public class Choice<A, B, C, D, E, F, G>
+    public class Choice<A, B, C, D, E, F, G> : ChoiceBase
     {
         public static implicit operator Choice<A, B, C, D, E, F, G>(A value) => new Choice<A, B, C, D, E, F, G>(value);
         public static implicit operator Choice<A, B, C, D, E, F, G>(B value) => new Choice<A, B, C, D, E, F, G>(value);
@@ -100,20 +93,16 @@
         public static implicit operator Choice<A, B, C, D, E, F, G>(F value) => new Choice<A, B, C, D, E, F, G>(value);
         public static implicit operator Choice<A, B, C, D, E, F, G>(G value) => new Choice<A, B, C, D, E, F, G>(value);
 
-        public Choice(A item) { Item = item; }
-        public Choice(B item) { Item = item; }
-        public Choice(C item) { Item = item; }
-        public Choice(D item) { Item = item; }
-        public Choice(E item) { Item = item; }
-        public Choice(F item) { Item = item; }
-        public Choice(G item) { Item = item; }
-
-        public dynamic Item { get; }
-
-        public override bool Equals(object obj) => Item.Equals(obj);
+        public Choice(A item) : base(item) { }
+        public Choice(B item) : base(item) { }
+        public Choice(C item) : base(item) { }
+        public Choice(D item) : base(item) { }
+        public Choice(E item) : base(item) { }
+        public Choice(F item) : base(item) { }
+        public Choice(G item) : base(item) { }
     }
 
-    public class Choice<A, B, C, D, E, F, G, H>
+    public class Choice<A, B, C, D, E, F, G, H> : ChoiceBase
     {
         public static implicit operator Choice<A, B, C, D, E, F, G, H>(A value) => new Choice<A, B, C, D, E, F, G, H>(value);
         public static implicit operator Choice<A, B, C, D, E, F, G, H>(B value) => new Choice<A, B, C, D, E, F, G, H>(value);
@@ -124,21 +113,17 @@
         public static implicit operator Choice<A, B, C, D, E, F, G, H>(G value) => new Choice<A, B, C, D, E, F, G, H>(value);
         public static implicit operator Choice<A, B, C, D, E, F, G, H>(H value) => new Choice<A, B, C, D, E, F, G, H>(value);
 
-        public Choice(A item) { Item = item; }
-        public Choice(B item) { Item = item; }
-        public Choice(C item) { Item = item; }
-        public Choice(D item) { Item = item; }
-        public Choice(E item) { Item = item; }
-        public Choice(F item) { Item = item; }
-        public Choice(G item) { Item = item; }
-        public Choice(H item) { Item = item; }
-
-        public dynamic Item { get; }
-
-        public override bool Equals(object obj) => Item.Equals(obj);
+        public Choice(A item) : base(item) { }
+        public Choice(B item) : base(item) { }
+        public Choice(C item) : base(item) { }
+        public Choice(D item) : base(item) { }
+        public Choice(E item) : base(item) { }
+        public Choice(F item) : base(item) { }
+        public Choice(G item) : base(item) { }
+        public Choice(H item) : base(item) { }
     }
 
-    public class Choice<A, B, C, D, E, F, G, H, I>
+    public class Choice<A, B, C, D, E, F, G, H, I> : ChoiceBase
     {
         public static implicit operator Choice<A, B, C, D, E, F, G, H, I>(A value) => new Choice<A, B, C, D, E, F, G, H, I>(value);
         public static implicit operator Choice<A, B, C, D, E, F, G, H, I>(B value) => new Choice<A, B, C, D, E, F, G, H, I>(value);
@@ -150,22 +135,18 @@
         public static implicit operator Choice<A, B, C, D, E, F, G, H, I>(H value) => new Choice<A, B, C, D, E, F, G, H, I>(value);
         public static implicit operator Choice<A, B, C, D, E, F, G, H, I>(I value) => new Choice<A, B, C, D, E, F, G, H, I>(value);
 
-        public Choice(A item) { Item = item; }
-        public Choice(B item) { Item = item; }
-        public Choice(C item) { Item = item; }
-        public Choice(D item) { Item = item; }
-        public Choice(E item) { Item = item; }
-        public Choice(F item) { Item = item; }
-        public Choice(G item) { Item = item; }
-        public Choice(H item) { Item = item; }
-        public Choice(I item) { Item = item; }
-
-        public dynamic Item { get; }
-
-        public override bool Equals(object obj) => Item.Equals(obj);
+        public Choice(A item) : base(item) { }
+        public Choice(B item) : base(item) { }
+        public Choice(C item) : base(item) { }
+        public Choice(D item) : base(item) { }
+        public Choice(E item) : base(item) { }
+        public Choice(F item) : base(item) { }
+        public Choice(G item) : base(item) { }
+        public Choice(H item) : base(item) { }
+        public Choice(I item) : base(item) { }
     }
 
-    public class Choice<A, B, C, D, E, F, G, H, I, J>
+    public class Choice<A, B, C, D, E, F, G, H, I, J> : ChoiceBase
     {
         public static implicit operator Choice<A, B, C, D, E, F, G, H, I, J>(A value) => new Choice<A, B, C, D, E, F, G, H, I, J>(value);
         public static implicit operator Choice<A, B, C, D, E, F, G, H, I, J>(B value) => new Choice<A, B, C, D, E, F, G, H, I, J>(value);
@@ -178,23 +159,19 @@
         public static implicit operator Choice<A, B, C, D, E, F, G, H, I, J>(I value) => new Choice<A, B, C, D, E, F, G, H, I, J>(value);
         public static implicit operator Choice<A, B, C, D, E, F, G, H, I, J>(J value) => new Choice<A, B, C, D, E, F, G, H, I, J>(value);
 
-        public Choice(A item) { Item = item; }
-        public Choice(B item) { Item = item; }
-        public Choice(C item) { Item = item; }
-        public Choice(D item) { Item = item; }
-        public Choice(E item) { Item = item; }
-        public Choice(F item) { Item = item; }
-        public Choice(G item) { Item = item; }
-        public Choice(H item) { Item = item; }
-        public Choice(I item) { Item = item; }
-        public Choice(J item) { Item = item; }
-
-        public dynamic Item { get; }
-
-        public override bool Equals(object obj) => Item.Equals(obj);
+        public Choice(A item) : base(item) { }
+        public Choice(B item) : base(item) { }
+        public Choice(C item) : base(item) { }
+        public Choice(D item) : base(item) { }
+        public Choice(E item) : base(item) { }
+        public Choice(F item) : base(item) { }
+        public Choice(G item) : base(item) { }
+        public Choice(H item) : base(item) { }
+        public Choice(I item) : base(item) { }
+        public Choice(J item) : base(item) { }
     }
 
-    public class Choice<A, B, C, D, E, F, G, H, I, J, K>
+    public class Choice<A, B, C, D, E, F, G, H, I, J, K> : ChoiceBase
     {
         public static implicit operator Choice<A, B, C, D, E, F, G, H, I, J, K>(A value) => new Choice<A, B, C, D, E, F, G, H, I, J, K>(value);
         public static implicit operator Choice<A, B, C, D, E, F, G, H, I, J, K>(B value) => new Choice<A, B, C, D, E, F, G, H, I, J, K>(value);
@@ -208,24 +185,20 @@
         public static implicit operator Choice<A, B, C, D, E, F, G, H, I, J, K>(J value) => new Choice<A, B, C, D, E, F, G, H, I, J, K>(value);
         public static implicit operator Choice<A, B, C, D, E, F, G, H, I, J, K>(K value) => new Choice<A, B, C, D, E, F, G, H, I, J, K>(value);
 
-        public Choice(A item) { Item = item; }
-        public Choice(B item) { Item = item; }
-        public Choice(C item) { Item = item; }
-        public Choice(D item) { Item = item; }
-        public Choice(E item) { Item = item; }
-        public Choice(F item) { Item = item; }
-        public Choice(G item) { Item = item; }
-        public Choice(H item) { Item = item; }
-        public Choice(I item) { Item = item; }
-        public Choice(J item) { Item = item; }
-        public Choice(K item) { Item = item; }
-
-        public dynamic Item { get; }
-
-        public override bool Equals(object obj) => Item.Equals(obj);
+        public Choice(A item) : base(item) { }
+        public Choice(B item) : base(item) { }
+        public Choice(C item) : base(item) { }
+        public Choice(D item) : base(item) { }
+        public Choice(E item) : base(item) { }
+        public Choice(F item) : base(item) { }
+        public Choice(G item) : base(item) { }
+        public Choice(H item) : base(item) { }
+        public Choice(I item) : base(item) { }
+        public Choice(J item) : base(item) { }
+        public Choice(K item) : base(item) { }
     }
 
-    public class Choice<A, B, C, D, E, F, G, H, I, J, K, L>
+    public class Choice<A, B, C, D, E, F, G, H, I, J, K, L> : ChoiceBase
     {
         public static implicit operator Choice<A, B, C, D, E, F, G, H, I, J, K, L>(A value) => new Choice<A, B, C, D, E, F, G, H, I, J, K, L>(value);
         public static implicit operator Choice<A, B, C, D, E, F, G, H, I, J, K, L>(B value) => new Choice<A, B, C, D, E, F, G, H, I, J, K, L>(value);
@@ -240,25 +213,21 @@
         public static implicit operator Choice<A, B, C, D, E, F, G, H, I, J, K, L>(K value) => new Choice<A, B, C, D, E, F, G, H, I, J, K, L>(value);
         public static implicit operator Choice<A, B, C, D, E, F, G, H, I, J, K, L>(L value) => new Choice<A, B, C, D, E, F, G, H, I, J, K, L>(value);
 
-        public Choice(A item) { Item = item; }
-        public Choice(B item) { Item = item; }
-        public Choice(C item) { Item = item; }
-        public Choice(D item) { Item = item; }
-        public Choice(E item) { Item = item; }
-        public Choice(F item) { Item = item; }
-        public Choice(G item) { Item = item; }
-        public Choice(H item) { Item = item; }
-        public Choice(I item) { Item = item; }
-        public Choice(J item) { Item = item; }
-        public Choice(K item) { Item = item; }
-        public Choice(L item) { Item = item; }
-
-        public dynamic Item { get; }
-
-        public override bool Equals(object obj) => Item.Equals(obj);
+        public Choice(A item) : base(item) { }
+        public Choice(B item) : base(item) { }
+        public Choice(C item) : base(item) { }
+        public Choice(D item) : base(item) { }
+        public Choice(E item) : base(item) { }
+        public Choice(F item) : base(item) { }
+        public Choice(G item) : base(item) { }
+        public Choice(H item) : base(item) { }
+        public Choice(I item) : base(item) { }
+        public Choice(J item) : base(item) { }
+        public Choice(K item) : base(item) { }
+        public Choice(L item) : base(item) { }
     }
 
-    public class Choice<A, B, C, D, E, F, G, H, I, J, K, L, M>
+    public class Choice<A, B, C, D, E, F, G, H, I, J, K, L, M> : ChoiceBase
     {
         public static implicit operator Choice<A, B, C, D, E, F, G, H, I, J, K, L, M>(A value) => new Choice<A, B, C, D, E, F, G, H, I, J, K, L, M>(value);
         public static implicit operator Choice<A, B, C, D, E, F, G, H, I, J, K, L, M>(B value) => new Choice<A, B, C, D, E, F, G, H, I, J, K, L, M>(value);
@@ -274,22 +243,18 @@
         public static implicit operator Choice<A, B, C, D, E, F, G, H, I, J, K, L, M>(L value) => new Choice<A, B, C, D, E, F, G, H, I, J, K, L, M>(value);
         public static implicit operator Choice<A, B, C, D, E, F, G, H, I, J, K, L, M>(M value) => new Choice<A, B, C, D, E, F, G, H, I, J, K, L, M>(value);
 
-        public Choice(A item) { Item = item; }
-        public Choice(B item) { Item = item; }
-        public Choice(C item) { Item = item; }
-        public Choice(D item) { Item = item; }
-        public Choice(E item) { Item = item; }
-        public Choice(F item) { Item = item; }
-        public Choice(G item) { Item = item; }
-        public Choice(H item) { Item = item; }
-        public Choice(I item) { Item = item; }
-        public Choice(J item) { Item = item; }
-        public Choice(K item) { Item = item; }
-        public Choice(L item) { Item = item; }
-        public Choice(M item) { Item = item; }
-
-        public dynamic Item { get; }
-
-        public override bool Equals(object obj) => Item.Equals(obj);
+        public Choice(A item) : base(item) { }
+        public Choice(B item) : base(item) { }
+        public Choice(C item) : base(item) { }
+        public Choice(D item) : base(item) { }
+        public Choice(E item) : base(item) { }
+        public Choice(F item) : base(item) { }
+        public Choice(G item) : base(item) { }
+        public Choice(H item) : base(item) { }
+        public Choice(I item) : base(item) { }
+        public Choice(J item) : base(item) { }
+        public Choice(K item) : base(item) { }
+        public Choice(L item) : base(item) { }
+        public Choice(M item) : base(item) { }
     }
 }

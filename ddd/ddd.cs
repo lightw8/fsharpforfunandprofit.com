@@ -1,4 +1,4 @@
-
+#nullable enable
 
 // ======================================================
 // This page contains C# code snippets adapted from the talk
@@ -15,7 +15,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices.ComTypes;
 using DiscriminatedUnions;
 
 var three = 1 + 2;
@@ -67,10 +66,8 @@ namespace RecordTypeExample
 namespace TestRecordTypeExample
 {
     using RecordTypeExample;
-    class Example
-    {
-        void Test()
-        {
+    class Example {
+        void Test() {
             var alice = new PersonalName(FirstName: "Alice", LastName: "Adams");
             var aliceClone = new PersonalName(FirstName: "Alice", LastName: "Adams");
             Console.WriteLine($"Alice's name is {alice}");
@@ -97,8 +94,7 @@ namespace EntityTypeExample {
     record PersonalName(string FirstName, string LastName);
 
     // class with immutable members, compared by custom member logic (lack of parity between conciseness of entities and records)
-    class Person
-    {
+    class Person {
         public int Id { get; init; } 
         public PersonalName Name { get; init; }
 
@@ -109,19 +105,18 @@ namespace EntityTypeExample {
             this.Name = Name;
         }
 
-        public override bool Equals(object other) => other switch
-        {
-            Person p => Id == p.Id,
-            _ => false
-        };
+        public override bool Equals(object? other) =>
+            other switch
+            {
+                Person p => Id == p.Id,
+                _        => false
+            };
 
         public override int GetHashCode() => this.Id.GetHashCode();
     }
     
-    class Example
-    {
-        void Test()
-        { 
+    class Example {
+        void Test() { 
             var alice = new Person( 1, new PersonalName(FirstName: "Alice", LastName: "Adams") );
             var bilbo = new Person( 1, new PersonalName(FirstName: "Bilbo", LastName: "Baggins") );
             Console.WriteLine($"Alice is {alice}");
@@ -148,10 +143,8 @@ namespace RecordVersioningExample {
     // class with immutable members, compared by member value
     record Person(int Id, Guid Version, PersonalName Name);
 
-    class Example
-    {
-        void Test()
-        {
+    class Example {
+        void Test() {
             var alice = new Person(Id: 1, Version: Guid.NewGuid(), 
                 Name: new(FirstName: "Alice", LastName: "Adams"));
 
@@ -185,8 +178,7 @@ namespace RecordMutabilityExample {
     // object type compared by value with one mutable property
     record Person(int Id){ public PersonalName? Name { get; set; } } 
 
-    class Example
-    {
+    class Example {
         void Test()
         {
             var alice = new Person(Id: 1){ Name = new PersonalName(FirstName: "Alice", LastName: "Adams") };
@@ -211,6 +203,12 @@ namespace ValueAndEntityReview {
     class Person {                // an object with immutable properties compared by reference
         public int Id { get; init; }
         public PersonalName Name { get; init; }
+
+        public Person(int id, PersonalName name)
+        {
+            Id = id;
+            Name = name;
+        }
     }
 }
 
@@ -254,14 +252,16 @@ namespace CardGameBoundedContext {
 
             var deck = new Deck { aceHearts, aceSpades, twoClubs };
 
-            Func<Deck, (Deck?, Card)> deal = deck => deck switch
-            {
-                Deck d when d.Count() > 1   => (d.Take(d.Count() - 1).ToList(), d.Last()),
-                Deck d when d.Count() == 1  => (null, d[0]),
-                _                           => throw new ArgumentException("incorrect input")
-            };
+            Func<Deck, (Deck?, Card)> deal = deck => 
+                deck switch
+                {
+                    Deck d when d.Count() > 1   => (d.Take(d.Count() - 1).ToList(), d.Last()),
+                    Deck d when d.Count() == 1  => (null, d[0]),
+                    _                           => throw new ArgumentException("incorrect input")
+                };
 
             (var deck2, var card) = deal(deck);
+        }
     }
 }
 
@@ -298,7 +298,7 @@ namespace ProductTypeExamples {
 
 
 // highlight from here ===>
-namespace ChoiceTypeExamples{
+namespace ChoiceTypeExamples {
 
     using Temp = Choice<F, C>;
 
@@ -320,11 +320,12 @@ namespace ChoiceTypeExamples{
     {
         void Test()
         {
-            Func<Temp, bool> isFever = temp => temp.Item switch // dynamically-typed in C# impl
+            Func<Temp, bool> isFever = temp => 
+                temp.Item switch // dynamically-typed in C# impl
                 {
                     F tempInF => tempInF.Value > 101,
                     C tempInC => tempInC.Value > 38.0,
-                    _ => throw new ArgumentException()
+                    _         => throw new ArgumentException()
                 };
 
             var temp1 = new F(103);
@@ -333,8 +334,8 @@ namespace ChoiceTypeExamples{
             var temp2 = new C(37.0);
             Console.WriteLine($"temp {temp2} is fever? {isFever(temp2)}");
 
-            Action<PaymentMethod> printPayment = paymentMethod => 
-                Console.WriteLine(paymentMethod.Item switch
+            Action<PaymentMethod> printPayment = paymentMethod => Console.WriteLine(
+                paymentMethod.Item switch
                 {
                     Cash          => $"Paid in cash",
                     Cheque cheque => $"Paid by cheque: {cheque.ChequeNumber}",
@@ -365,23 +366,22 @@ namespace OptionalType {
 
     class Example
     {
-        Nullable<int> optionalInt1;
-        Nullable<bool> optionalBool1;
+        Nullable<int> optionalInt1; // either int or null
+        Nullable<bool> optionalBool1; // either bool or null
         int? optionalInt2; // built-in syntax
         bool? optionalBool2; // built-in syntax
 
         string? optionalString; // only useful with C#8 nullable reference type annotations (compiler warning, not error)
     }
-    // <==== highlight to here and Run
 
     // only useful with C#8 nullable reference type annotations (compiler warning, not error)
     record PersonalName1(string FirstName, string? MiddleInitial, string LastName);
     // alternative, but no construction constraints. C# 10 promises required properties
     record PersonalName2
     {
-        string FirstName { get; init; }
-        string MiddleInitial { get; init; }
-        string LastName { get; init; }
+        public string FirstName { get; init; } // could be null if not supplied in object initializer
+        public string? MiddleInitial { get; init; } // explicitly allowed to be null
+        public string LastName { get; init; } // could be null if not supplied in object initializer
     }
 }
 // <==== highlight to here and Run
@@ -390,26 +390,50 @@ namespace OptionalType {
 
 // highlight from here ===>
 namespace SingleChoiceType {
-    using EmailAddress = Choice<string>;
-    using PhoneNumber = Choice<string>;
-    //using EmailAddress = String; // alternative using string alias
-    //using PhoneNumber = String; // alternative using string alias
 
-    using CustomerId = Choice<int>;
-    using OrderId = Choice<int>;
-    //using CustomerId = Int32; // alternative using int alias
-    //using OrderId = Int32;// alternative using int alias
+    // option using aliases
+    // EmailAddress and PhoneNumber not distinct to C# compiler
+    // can't "chain" aliases (e.g. 'using VerifiedEmail = EmailAddress' generates a C# compiler error)
+    using EmailAddress = String;
+    using PhoneNumber = String;
+    using CustomerId = Int32;
+    using OrderId = Int32;
+
+    // alternative option using single "choice" type (EmailAddress and PhoneNumber still not distinct to C# compiler)
+    using EmailAddress2 = Choice<string>;
+    using PhoneNumber2 = Choice<string>;
+    using CustomerId2 = Choice<int>; // reference type with integer member "Item"
+    using OrderId2 = Choice<int>; // reference type with integer member "Item"
+
+    // distinct classes that can't be confused at compile-time (have to use subclassing in C# to get this type checking)
+    // C# 10 promises primary constructors for classes (as with the new record types)
+    class EmailAddress3 : Choice<string> { public EmailAddress3(string emailAddress) : base(emailAddress) { } }
+    class PhoneNumber3 : Choice<string> { public PhoneNumber3(string phoneNumber) : base(phoneNumber) { } }
 
     class Example
     {
         void Test()
         {
-            var email1 = new EmailAddress("abc");
-            var email2 = new EmailAddress("def");
+            // example with aliases for built-in types
+            var email1a = new EmailAddress("abc");
+            var email1b = new EmailAddress("def");
             var phone1 = new PhoneNumber("abc");
+            Console.WriteLine($"{email1a} == {email1b}? {email1a == email1b}");
+            Console.WriteLine($"{email1a} == {phone1}? {email1a == phone1}"); // no compiler error with aliases only
 
-            Console.WriteLine($"{email1} == {email2}? {email1 == email2}");
-            Console.WriteLine($"{email1} == {phone1}? {email1 == phone1}"); // no compiler error for C# (unlike F#)
+            // example with aliases to single-choice type
+            var email2a = new EmailAddress2("abc");
+            var email2b = new EmailAddress2("def");
+            var phone2 = new PhoneNumber2("abc");
+            Console.WriteLine($"{email2a} == {email2b}? {email2a == email2b}");
+            Console.WriteLine($"{email2a} == {phone2}? {email2a == phone2}"); // no compiler error with aliases only
+
+            // example with 
+            var email3a = new EmailAddress3("abc");
+            var email3b = new EmailAddress3("def");
+            var phone3 = new PhoneNumber3("abc");
+            Console.WriteLine($"{email3a} == {email3b}? {email3a == email3b}");
+            //Console.WriteLine($"{email3a} == {phone3}? {email3a == phone3}"); // compiler error if uncommented
         }
     }
 }
@@ -420,25 +444,28 @@ namespace SingleChoiceType {
 // highlight from here ===>
 namespace EmailAddressType {
     using System.Text.RegularExpressions;
-    using EmailAddress = String;
+    class EmailAddress : Choice<string> { public EmailAddress(string emailAddress) : base(emailAddress) { } }
+    // alternatively, "using EmailAddress = String;", but string and EmailAddress types won't be distinct to the compiler
 
     class Example
     {
         void Test()
         { 
             // function createEmailAddress : string => EmailAddress?
-            Func<string, EmailAddress?> createEmailAddress = s => s switch
-            {
-                string maybeEmail when Regex.IsMatch(maybeEmail, @"^\S+@\S+\.\S+$") => maybeEmail,
-                _                                                                   => null
-            };
+            Func<string, EmailAddress?> createEmailAddress = s => 
+                s switch
+                {
+                    string maybeEmail when Regex.IsMatch(maybeEmail, @"^\S+@\S+\.\S+$") => new EmailAddress(maybeEmail),
+                    _                                                                   => null
+                };
 
             // method with same signature (harder to pass it around)
-            EmailAddress CreateEmailAddress(string s) => s switch
-            {
-                string maybeEmail when Regex.IsMatch(maybeEmail, @"^\S+@\S+\.\S+$") => maybeEmail,
-                _                                                                   => null
-            };
+            EmailAddress? CreateEmailAddress(string s) =>
+                s switch
+                {
+                    string maybeEmail when Regex.IsMatch(maybeEmail, @"^\S+@\S+\.\S+$") => new EmailAddress(maybeEmail),
+                    _                                                                   => null
+                };
 
             var email1 = createEmailAddress("a@example.com");
             var email2 = createEmailAddress("example.com");
@@ -452,18 +479,19 @@ namespace EmailAddressType {
 
 // highlight from here ===>
 namespace ConstrainedString {
-    using String50 = String;
+    class String50 : Choice<string> { public String50(string s) : base(s) { } }
 
     class Example
     {
         void Test()
         {
             // function createEmailAddress : string => EmailAddress option
-            Func<string, String50?> createString50 = s => s switch
-            {
-                string maybeString50 when maybeString50.Length <= 50 => maybeString50,
-                _                                                    => null
-            };
+            Func<string, String50?> createString50 = s =>
+                s switch
+                {
+                    string maybeString50 when maybeString50.Length <= 50 => new String50(maybeString50),
+                    _                                                    => null
+                };
 
             var s1 = createString50("12345");
             var s2 = createString50(new string(Enumerable.Range(0,100).Select(_ => 'a').ToArray()));
@@ -475,22 +503,23 @@ namespace ConstrainedString {
 
 // highlight from here ===>
 namespace ConstrainedInteger {
-    using OrderLineQty = Int32;
+    class OrderLineQty : Choice<int> { public OrderLineQty(int qty) : base(qty) { } }
     
     class Example
     {
         void Test()
         { 
             // function createEmailAddress : string => EmailAddress option
-            Func<int, OrderLineQty?> createOrderLineQty = qty => qty switch
-            {
-                int maybeOrderQty when maybeOrderQty > 0 && maybeOrderQty <= 99 => maybeOrderQty,
-                _                                                               => null
-            };
+            Func<int, OrderLineQty?> createOrderLineQty = qty =>
+                qty switch 
+                {
+                    > 0 and <= 99 => new OrderLineQty(qty),
+                    _             => null
+                };
 
             // function createEmailAddress : string => EmailAddress option
-            Func<OrderLineQty, OrderLineQty?> increment = qty => createOrderLineQty(qty++);
-            Func<OrderLineQty, OrderLineQty?> decrement = qty => createOrderLineQty(qty--);
+            Func<OrderLineQty, OrderLineQty?> increment = qty => createOrderLineQty(qty.Item + 1);
+            Func<OrderLineQty, OrderLineQty?> decrement = qty => createOrderLineQty(qty.Item - 1);
 
             var qty1 = createOrderLineQty(1);
             var qty2 = createOrderLineQty(0);
@@ -508,25 +537,25 @@ namespace ConstrainedInteger {
 // Prologue revisited
 // ======================================================
 
-namespace PrologueVersion2 = 
+namespace PrologueVersion2 {
 
-    type String1 = String1 of string
-    type String50 = String50 of string
-    type EmailAddress = EmailAddress of string
+    class String1 : Choice<string> { public String1(string s) : base(s) { } }
+    class String50 : Choice<string> { public String50(string s) : base(s) { } }
+    class EmailAddress : Choice<string> { public EmailAddress(string s) : base(s) { } }
 
-    type PersonalName = {
-        FirstName: String50
-        MiddleInitial: String1 option
-        LastName: String50 }
+    record PersonalName(
+        String50 FirstName,
+        String1? MiddleInitial,
+        String50 LastName);
 
-    type EmailContactInfo = {
-        EmailAddress: EmailAddress
-        IsEmailVerified: bool }
+    record EmailContactInfo(
+        EmailAddress EmailAddress,
+        bool IsEmailVerified);
 
-    type Contact = {
-        Name: PersonalName 
-        Email: EmailContactInfo }
-
+    record Contact(
+        PersonalName Name,
+        EmailContactInfo Email);
+}
 
 // ======================================================
 // Verified email
@@ -535,145 +564,132 @@ namespace PrologueVersion2 =
 // "Rule 2: The verified flag can only be set by a special verification service"
 // ======================================================
 
-namespace VerifiedEmailExample = 
-    type String1 = String1 of string
-    type String50 = String50 of string
-    type EmailAddress = EmailAddress of string
+namespace VerifiedEmailExample {
 
-    type PersonalName = {
-        FirstName: String50
-        MiddleInitial: String1 option
-        LastName: String50 }
+    using EmailContactInfo = Choice<EmailAddress, VerifiedEmail>;
 
-    type VerifiedEmail = VerifiedEmail of EmailAddress
-    type VerificationHash = VerificationHash of string
-    type VerificationService = 
-        (EmailAddress * VerificationHash) ->  VerifiedEmail option
+    class String1 : Choice<string> { public String1(string s) : base(s) { } }
+    class String50 : Choice<string> { public String50(string s) : base(s) { } }
+    class EmailAddress : Choice<string> { public EmailAddress(string s) : base(s) { } }
 
-    type EmailContactInfo = 
-        | Unverified of EmailAddress
-        | Verified of VerifiedEmail
+    record PersonalName(
+        String50 FirstName,
+        String1? MiddleInitial,
+        String50 LastName);
 
-    type Contact = {
-        Name: PersonalName 
-        Email: EmailContactInfo }
+    class VerifiedEmail : Choice<EmailAddress> { public VerifiedEmail(EmailAddress s) : base(s) { } }
+    class VerificationHash : Choice<string> { public VerificationHash(string s) : base(s) { } }
+    delegate VerifiedEmail? VerificationService(EmailAddress address, VerificationHash hash);
 
+    record Contact(
+        PersonalName Name,
+        EmailContactInfo Email);
+}
 
 // ======================================================
 // A contact must have an email or a postal address
 // ======================================================
 
-namespace EMailAndContactExample_Before = 
+namespace EMailAndContactExample_Before {
 
+    using EmailContactInfo = Choice<EmailAddress, VerifiedEmail>;
 
-    type String1 = String1 of string
-    type String50 = String50 of string
-    type EmailAddress = EmailAddress of string
+    class String1 : Choice<string> { public String1(string s) : base(s) { } }
+    class String50 : Choice<string> { public String50(string s) : base(s) { } }
+    class EmailAddress : Choice<string> { public EmailAddress(string s) : base(s) { } }
 
-    type PersonalName = {
-        FirstName: String50
-        MiddleInitial: String1 option
-        LastName: String50 }
+    record PersonalName(
+        String50 FirstName,
+        String1? MiddleInitial,
+        String50 LastName);
 
-    type VerifiedEmail = VerifiedEmail of EmailAddress
-    type VerificationHash = VerificationHash of string
-    type VerificationService = 
-        (EmailAddress * VerificationHash) ->  VerifiedEmail option
+    class VerifiedEmail : Choice<EmailAddress> { public VerifiedEmail(EmailAddress s) : base(s) { } }
+    class VerificationHash : Choice<string> { public VerificationHash(string s) : base(s) { } }
+    delegate VerifiedEmail? VerificationService(EmailAddress address, VerificationHash hash);
 
-    type EmailContactInfo = 
-        | Unverified of EmailAddress
-        | Verified of VerifiedEmail
+    record PostalContactInfo(
+        String50 Address1, 
+        String50? Address2,
+        String50 Town,
+        String50 PostCode);
+        
+    record Contact(
+        PersonalName Name,
+        EmailContactInfo Email,
+        PostalContactInfo Address);
+}
 
-    type PostalContactInfo = {
-        Address1: String50
-        Address2: String50 option
-        Town: String50
-        PostCode: String50 }
+namespace EMailAndContactExample_After {
 
-    type Contact = {
-        Name: PersonalName 
-        Email: EmailContactInfo 
-        Address: PostalContactInfo 
-        }
+    using ContactInfo = Choice<EmailContactInfo, PostalContactInfo, EmailAndAddress>;
 
+    class String1 : Choice<string> { public String1(string s) : base(s) { } }
+    class String50 : Choice<string> { public String50(string s) : base(s) { } }
+    class EmailAddress : Choice<string> { public EmailAddress(string s) : base(s) { } }
 
-namespace EMailAndContactExample_After = 
+    record PersonalName(
+        String50 FirstName,
+        String1? MiddleInitial,
+        String50 LastName);
 
-    type String1 = String1 of string
-    type String50 = String50 of string
-    type EmailAddress = EmailAddress of string
+    class VerifiedEmail : Choice<EmailAddress> { public VerifiedEmail(EmailAddress s) : base(s) { } }
+    class VerificationHash : Choice<string> { public VerificationHash(string s) : base(s) { } }
+    delegate VerifiedEmail? VerificationService(EmailAddress address, VerificationHash hash);
 
-    type PersonalName = {
-        FirstName: String50
-        MiddleInitial: String1 option
-        LastName: String50 }
+    class EmailContactInfo : Choice<EmailAddress, VerifiedEmail> { 
+        public EmailContactInfo(EmailAddress email) : base(email) { }
+        public EmailContactInfo(VerifiedEmail verified) : base(verified) { }
+    }
 
-    type VerifiedEmail = VerifiedEmail of EmailAddress
-    type VerificationHash = VerificationHash of string
-    type VerificationService = 
-        (EmailAddress * VerificationHash) ->  VerifiedEmail option
+    record PostalContactInfo(
+        String50 Address1, 
+        String50? Address2,
+        String50 Town,
+        String50 PostCode);
 
-    type EmailContactInfo = 
-        | Unverified of EmailAddress
-        | Verified of VerifiedEmail
-
-    type PostalContactInfo = {
-        Address1: String50
-        Address2: String50 option
-        Town: String50
-        PostCode: String50 }
-
-    type ContactInfo = 
-        | EmailOnly of EmailContactInfo
-        | AddrOnly of PostalContactInfo
-        | EmailAndAddr of EmailContactInfo * PostalContactInfo
-
-    type Contact = {
-        Name: PersonalName 
-        ContactInfo: ContactInfo 
-        }
-
+    record EmailAndAddress(EmailAddress EmailAddress, PostalContactInfo PostalContactInfo);
+        
+    record Contact(
+        PersonalName Name,
+        ContactInfo ContactInfo);
+}
 
 // ======================================================
 // A contact must have at least one way of being contacted
 // ======================================================
 
+namespace EMailAndContactExample_Alternative {
 
-namespace EMailAndContactExample_Alternative = 
+    class String1 : Choice<string> { public String1(string s) : base(s) { } }
+    class String50 : Choice<string> { public String50(string s) : base(s) { } }
+    class EmailAddress : Choice<string> { public EmailAddress(string s) : base(s) { } }
 
-    type String1 = String1 of string
-    type String50 = String50 of string
-    type EmailAddress = EmailAddress of string
+    record PersonalName(
+        String50 FirstName,
+        String1? MiddleInitial,
+        String50 LastName);
 
-    type PersonalName = {
-        FirstName: String50
-        MiddleInitial: String1 option
-        LastName: String50 }
+    class VerifiedEmail : Choice<EmailAddress> { public VerifiedEmail(EmailAddress s) : base(s) { } }
+    class VerificationHash : Choice<string> { public VerificationHash(string s) : base(s) { } }
+    delegate VerifiedEmail? VerificationService(EmailAddress address, VerificationHash hash);
 
-    type VerifiedEmail = VerifiedEmail of EmailAddress
-    type VerificationHash = VerificationHash of string
-    type VerificationService = 
-        (EmailAddress * VerificationHash) ->  VerifiedEmail option
+    class EmailContactInfo : Choice<EmailAddress, VerifiedEmail> { 
+        public EmailContactInfo(EmailAddress email) : base(email) { }
+        public EmailContactInfo(VerifiedEmail verified) : base(verified) { }
+    }
+    class ContactInfo : Choice<EmailContactInfo, PostalContactInfo> { 
+        public ContactInfo(EmailContactInfo email) : base(email) { }
+        public ContactInfo(PostalContactInfo address) : base(address) { }
+    }
 
-    type EmailContactInfo = 
-        | Unverified of EmailAddress
-        | Verified of VerifiedEmail
-
-    type PostalContactInfo = {
-        Address1: String50
-        Address2: String50 option
-        Town: String50
-        PostCode: String50 }
-
-    type ContactInfo = 
-        | EmailOnly of EmailContactInfo
-        | AddrOnly of PostalContactInfo
-
-    type Contact = {
-        Name: PersonalName 
-        PrimaryContactInfo: ContactInfo
-        SecondaryContactInfo: ContactInfo option
-        }
-
-
-
+    record PostalContactInfo(
+        String50 Address1, 
+        String50? Address2,
+        String50 Town,
+        String50 PostCode);
+        
+    record Contact(
+        PersonalName Name,
+        ContactInfo PrimaryContactInfo,
+        ContactInfo? SecondaryContactInfo);
+}
